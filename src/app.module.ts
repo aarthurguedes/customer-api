@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { PingCacheMiddleware } from './modules/cache/middleware/ping-cache.middleware';
 import { CustomersModule } from './modules/customers/customers.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CustomersModule } from './modules/customers/customers.module';
     AuthModule,
     CacheModule,
     CustomersModule,
+    HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
 })
