@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { throwError } from 'src/utils/exception-thrower';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,13 +15,11 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException();
-    const { is_valid, status, error } = await this.authService.isValidToken(
-      token,
-    );
-    if (!is_valid) {
-      throwError(status, error);
+    try {
+      return await this.authService.isValidToken(token);
+    } catch (error) {
+      throw error;
     }
-    return is_valid;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

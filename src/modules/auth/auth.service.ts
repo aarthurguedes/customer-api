@@ -1,5 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,9 +14,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async isValidToken(
-    token: string,
-  ): Promise<{ is_valid: boolean; status: number; error?: string }> {
+  async isValidToken(token: string): Promise<boolean> {
     try {
       const baseUrl = this.configService.get('SSO_URL');
       await firstValueFrom(
@@ -21,13 +23,11 @@ export class AuthService {
           { headers: { Authorization: `Bearer ${token}` } },
         ),
       );
-      return { is_valid: true, status: 200 };
+      return true;
     } catch (error) {
-      return {
-        is_valid: false,
-        status: error.response.status,
-        error: error.response.data.error_description,
-      };
+      if (error.response?.status === 401)
+        throw new UnauthorizedException(error.response.data.error_description);
+      throw new BadGatewayException('SSO Unavailable');
     }
   }
 }
