@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { REDIS_CLIENT } from './constants';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
 import { CacheRedisService } from './cache-redis.service';
+import { REDIS_CLIENT } from './constants';
 
 @Module({
   providers: [
@@ -18,6 +18,6 @@ import { CacheRedisService } from './cache-redis.service';
     },
     CacheRedisService,
   ],
-  exports: [CacheRedisService],
+  exports: [CacheRedisService, REDIS_CLIENT],
 })
 export class CacheModule {}
