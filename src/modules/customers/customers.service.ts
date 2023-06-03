@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class CustomersService {
   constructor(
     @Inject(CacheRedisService)
-    private readonly redisService: CacheService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create(data: CreateCustomerDto): Promise<Customer> {
@@ -24,7 +24,7 @@ export class CustomersService {
       ...data,
     };
     const key = `customer:${id}`;
-    await this.redisService.set(key, JSON.stringify(customer));
+    await this.cacheService.set(key, JSON.stringify(customer));
     return customer;
   }
 
@@ -36,21 +36,21 @@ export class CustomersService {
     await this.getCustomerOrThrow(id);
     // This code snippet was implemented aiming to follow the project specification
     if (id !== data.id) {
-      const customerWithNewId = await this.redisService.get(
+      const customerWithNewId = await this.cacheService.get(
         `customer:${data.id}`,
       );
       if (customerWithNewId)
         throw new ConflictException(
           `Customer with id ${data.id} already exists`,
         );
-      await this.redisService.delete(`customer:${id}`);
+      await this.cacheService.delete(`customer:${id}`);
     }
-    await this.redisService.set(`customer:${data.id}`, JSON.stringify(data));
+    await this.cacheService.set(`customer:${data.id}`, JSON.stringify(data));
     return data;
   }
 
   private async getCustomerOrThrow(id: string): Promise<Customer> {
-    const customer = await this.redisService.get(`customer:${id}`);
+    const customer = await this.cacheService.get(`customer:${id}`);
     if (!customer) throw new NotFoundException('Customer not found');
     return JSON.parse(customer);
   }
